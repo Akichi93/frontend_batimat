@@ -90,3 +90,22 @@ export function validateProductForm(form) {
 
     return errors;
 }
+
+export function validateOrderForm(form) {
+    const errors = {};
+
+
+    if (!form.customer_id) {
+        errors.customer_id = 'Veuillez selectionnez le client.';
+    } 
+
+    if (!form.payment) {
+        errors.payment = 'Veuillez selectionnez la méthode paiement.';
+    } 
+
+
+    
+
+
+    return errors;
+}

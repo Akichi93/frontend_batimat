@@ -109,7 +109,6 @@ export default {
       try {
         this.isLoading = true;
         this.orders = await appService.getOrder();
-        console.log(this.orders);
       } catch (error) {
         console.error("There was an error fetching the data:", error);
       } finally {

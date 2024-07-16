@@ -9,8 +9,6 @@ const AxiosService = axios.create({
         'Content-Type': 'application/json',
     },
 });
-
-// Intercepteur pour ajouter le token dans le header
 AxiosService.interceptors.request.use(config => {
     const token = AppStorage.getToken();
     if (token) {
@@ -21,13 +19,14 @@ AxiosService.interceptors.request.use(config => {
     return Promise.reject(error);
 });
 
-// Intercepteur pour gérer les erreurs de réponse
+
 AxiosService.interceptors.response.use(response => {
     return response;
 }, error => {
     if (error.response && error.response.status === 401) {
-        // Si une réponse 401 est reçue, redirigez vers la page de connexion
-        router.push('/lockscreen');
+
+        AppStorage.clear();
+        this.$router.push({ name: "welcome" });
     }
     return Promise.reject(error);
 });

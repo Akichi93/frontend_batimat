@@ -36,6 +36,12 @@
                       @select="optionSelected"
                       v-model="form.customer_id"
                     ></customercomponent>
+                    <p
+                      style="color: red"
+                      class="text-red"
+                      v-if="errors.customer_id"
+                      v-text="errors.customer_id"
+                    ></p>
                   </div>
                 </div>
                 <div class="col-sm-12 col-md-6">
@@ -49,6 +55,12 @@
                       v-model="form.payment"
                     ></paymentcomponent>
                   </div>
+                  <p
+                      style="color: red"
+                      class="text-red"
+                      v-if="errors.payment"
+                      v-text="errors.payment"
+                    ></p>
                 </div>
               </div>
               <div class="row">
@@ -170,6 +182,7 @@ import Header from "../../layout/Header.vue";
 import Sidebar from "../../layout/Sidebar.vue";
 import appService from "../../services/appService";
 import inputNumber from "../../components/input/inputNumber.vue";
+import { validateOrderForm } from "../../utils/helpers/formValidation";
 import {
   calculateAmount,
   calculateTotal,
@@ -197,6 +210,7 @@ export default {
         customer_id: "",
         payment: "",
       },
+      errors: {},
       products: [{ item: "", unitPrice: 0, quantity: 0, amount: 0 }],
     };
   },
@@ -213,6 +227,15 @@ export default {
       this.products.splice(index, 1);
     },
     async productSelected(index, product) {
+      // Vérifiez si le produit est déjà sélectionné
+      if (this.products.some((p, i) => p.item === product && i !== index)) {
+        toaster.error("Ce produit est déjà sélectionné.", {
+          position: "top-right",
+        });
+        this.products[index].item = ""; // Réinitialisez la sélection du produit
+        return;
+      }
+
       try {
         const productData = await appService.getProductPrice(product);
         this.products[index].unitPrice = productData.amount;
@@ -234,11 +257,19 @@ export default {
       product.amount = calculateAmount(product.unitPrice, product.quantity);
     },
     async storeOrder() {
+      this.errors = validateOrderForm(this.form);
+
+      if (Object.keys(this.errors).length > 0) {
+        toaster.error(`Veuillez remplir tous les champs`, {
+          position: "top-right",
+        });
+        return;
+      }
       try {
         const orderData = {
           customer_id: this.form.customer_id,
           payment_method: this.form.payment,
-          total_amount: this.total, // Utilisation du total calculé
+          total_amount: this.total, // Corrected this line
           products: this.products.map((product) => ({
             productId: product.item,
             quantity: product.quantity,
@@ -247,19 +278,19 @@ export default {
           })),
         };
 
+        console.log(orderData);
+
         const createorder = await appService.postOrder(orderData);
 
         toaster.success(`Commande ajoutée`, { position: "top-right" });
 
-        // this.$router.push("/listorder");
+        this.$router.push("/listorder");
       } catch (error) {
-        console.log("Erreur lors de l'ajout de la commande. Veuillez réessayer.");
+        console.log(
+          "Erreur lors de l'ajout de la commande. Veuillez réessayer."
+        );
       }
     },
   },
 };
 </script>
-
-<style scoped>
-/* Styles optionnels */
-</style>

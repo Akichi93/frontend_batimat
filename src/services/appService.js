@@ -19,7 +19,7 @@ class appService {
         };
 
         try {
-            const updatedCustomers = await axiosService.post(apiUrl.postcustomer, newCustomerData);
+            const updatedCustomers = await axios.post(apiUrl.postcustomer, newCustomerData);
             return updatedCustomers.data;
         } catch (error) {
             throw new Error("Échec de l'insertion du client");
