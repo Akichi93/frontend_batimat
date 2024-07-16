@@ -33,6 +33,8 @@ class AppStorage {
     static async clear() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('contact');
+        localStorage.removeItem('email');
         localStorage.removeItem('id');
     }
 
