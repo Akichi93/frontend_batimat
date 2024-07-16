@@ -51,7 +51,6 @@
         <i class="fa fa-ellipsis-v"></i>
       </a>
       <div class="dropdown-menu dropdown-menu-right">
-        <a class="dropdown-item" href="">Mon profile</a>
         <a class="dropdown-item" href="#" @click="logout">Se déconnecter</a>
       </div>
     </div>
@@ -60,19 +59,15 @@
   <script>
 import AppStorage from "../db/AppStorage";
 export default {
-  data() {
-    return {
-      isLoading: false,
-      modalOpen: false,
-    };
-  },
-
   methods: {
-    computed: {
-      name() {
-        console.log(localStorage.getItem('user'))
-        return AppStorage.getUser();
-      },
+    data() {
+      return {
+        name: AppStorage.getUser(),
+      };
+    },
+    logout() {
+      AppStorage.clear();
+      this.$router.push({ name: "welcome" });
     },
   },
   name: "Header",

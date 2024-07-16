@@ -75,6 +75,14 @@
             </div>
           </div>
         </div>
+        <div class="row">
+          
+          <div class="col-md-6">
+            <Bar :data="chartDonnees" />
+          </div>
+        </div>
+
+     
       </div>
       <!-- /Page Content -->
     </div>
@@ -86,7 +94,26 @@ import AppStorage from "../db/AppStorage";
 import Header from "../layout/Header.vue";
 import Sidebar from "../layout/Sidebar.vue";
 import { apiUrl } from "../utils/constants/apiUrl";
+import { Bar } from "vue-chartjs";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from "chart.js";
 import axios from "axios";
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale
+);
 
 export default {
   name: "dashboard",
@@ -94,10 +121,21 @@ export default {
     return {
       name: AppStorage.getUser(),
       dashboardData: {},
+      chartDonnees: {
+        labels: [""],
+        datasets: [
+          {
+            label: "Nombre de produit par fournisseur",
+            backgroundColor: "#f87979",
+            data: [0],
+          },
+        ],
+      },
     };
   },
   created() {
     this.fetchDashboardData();
+    this.getData(); // Appel à la méthode getData ici
   },
   methods: {
     async fetchDashboardData() {
@@ -108,11 +146,42 @@ export default {
         console.error("Error fetching dashboard data", error);
       }
     },
-  },
+    async getData() {
+      try {
+        const response = await axios.get(apiUrl.getdashboard);
 
-  components: { Header, Sidebar },
+        this.graphs = response.data.suppliers;
+        console.log(response);
+
+        const label = response.data.suppliers.map((supplier) => supplier.name);
+        const donnees = response.data.suppliers.map((supplier) => supplier.y);
+
+        this.chartDonnees = {
+          labels: label,
+          datasets: [
+            {
+              label: "Nombre de produit par fournisseur",
+              backgroundColor: [
+                "#123E6B",
+                "#97B0C4",
+                "#A5C8ED",
+                "#F26D85",
+                "#4CAF50",
+                "#FFC107",
+                "#9C27B0",
+                "#FF5722",
+                "#795548",
+                "#009688",
+              ],
+              data: donnees,
+            },
+          ],
+        };
+      } catch (error) {
+        console.error("Error fetching data for chart", error);
+      }
+    },
+  },
+  components: { Header, Sidebar, Bar },
 };
 </script>
-<style scoped>
-</style>
-

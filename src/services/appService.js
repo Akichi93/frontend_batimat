@@ -28,7 +28,7 @@ class appService {
 
     async getCustomer() {
         try {
-            const response = await axios.get(apiUrl.getcustomer);
+            const response = await axiosService.get(apiUrl.getcustomer);
 
             return response.data;
         } catch (error) {

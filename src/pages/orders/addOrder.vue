@@ -92,6 +92,13 @@
                               :placeholder="'Entrez la quantité'"
                             />
                           </td>
+                          <span
+                            class="text-danger"
+                            v-if="product.quantity > product.availableQuantity"
+                          >
+                            Quantité maximale disponible :
+                            {{ product.availableQuantity }}
+                          </span>
                           <td>
                             <input
                               class="form-control"
@@ -155,8 +162,8 @@
     </div>
   </div>
 </template>
-  
-  <script>
+
+<script>
 import customercomponent from "../../components/select/customercomponent.vue";
 import productcomponent from "../../components/select/productcomponent.vue";
 import Header from "../../layout/Header.vue";
@@ -208,23 +215,30 @@ export default {
     async productSelected(index, product) {
       try {
         const productData = await appService.getProductPrice(product);
-        this.products[index].unitPrice = productData;
+        this.products[index].unitPrice = productData.amount;
+        this.products[index].availableQuantity = productData.quantity;
         this.updateAmount(index);
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
     },
-
     updateAmount(index) {
       const product = this.products[index];
+      if (product.quantity > product.availableQuantity) {
+        toaster.error(
+          `Quantité maximale disponible : ${product.availableQuantity}`,
+          { position: "top-right" }
+        );
+        product.quantity = product.availableQuantity;
+      }
       product.amount = calculateAmount(product.unitPrice, product.quantity);
     },
-
     async storeOrder() {
       try {
         const orderData = {
           customer_id: this.form.customer_id,
           payment_method: this.form.payment,
+          total_amount: this.total, // Utilisation du total calculé
           products: this.products.map((product) => ({
             productId: product.item,
             quantity: product.quantity,
@@ -235,19 +249,17 @@ export default {
 
         const createorder = await appService.postOrder(orderData);
 
-        toaster.success(`Commande ajouté`, { position: "top-right" });
+        toaster.success(`Commande ajoutée`, { position: "top-right" });
 
-        this.$router.push("/listorder");
+        // this.$router.push("/listorder");
       } catch (error) {
-        
-        alert("Erreur lors de l'ajout de la commande. Veuillez réessayer.");
+        console.log("Erreur lors de l'ajout de la commande. Veuillez réessayer.");
       }
     },
   },
 };
 </script>
-  
-  <style scoped>
-/* Add your styles here */
+
+<style scoped>
+/* Styles optionnels */
 </style>
-  
